@@ -8,11 +8,11 @@ import android.util.Log;
 import android.view.View;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,35 +31,29 @@ public class MainActivity extends AppCompatActivity {
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
 
-        mObservable = Observable.create(new ObservableOnSubscribe<Integer>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
-                e.onNext(1);
-                e.onNext(2);
-                e.onNext(3);
-                e.onComplete();
-            }
-        });
+        mObservable = Observable.just(1, 2, 3)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
 
         mObserver = new Observer<Integer>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
-                Log.d(TAG, "onSubscribe: ");
+                Log.d(TAG, "onSubscribe: " + Thread.currentThread().getName());
             }
 
             @Override
             public void onNext(@NonNull Integer integer) {
-                Log.d(TAG, "onNext: " + integer);
+                Log.d(TAG, "onNext: " + integer + " " + Thread.currentThread().getName());
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-                Log.d(TAG, "onError: ");
+                Log.d(TAG, "onError: " + Thread.currentThread().getName());
             }
 
             @Override
             public void onComplete() {
-                Log.d(TAG, "onComplete: ");
+                Log.d(TAG, "onComplete: " + Thread.currentThread().getName());
             }
         };
 
